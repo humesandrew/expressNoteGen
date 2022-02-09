@@ -13,16 +13,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("./public"));
 
+
+const { v1: uuidv1 } = require('uuid');
+
 // API routes //
 const readFromFile = util.promisify(fs.readFile);
 
 const writeToFile = (destination, content) =>
-  fs.writeFileAsync(destination, JSON.stringify(content, null, 4), (err) =>
+  fs.writeFile(destination, JSON.stringify(content, null, 4), (err) =>
     err ? console.error(err) : console.info(`\nData written to ${destination}`)
   );
 
 const readAndAppend = (content, file) => {
-  fs.readFileAsync(file, "utf8", (err, data) => {
+  fs.readFile(file, "utf8", (err, data) => {
     if (err) {
       console.error(err);
     } else {
@@ -42,7 +45,8 @@ app.post("/api/notes", (req, res) => {
   console.info(`${req.method} request received to add a note`);
 
   const { title, text } = req.body;
-  const newNote = { title, text };
+  const id = uuidv1();
+  const newNote = { title, text, id };
 
   if (title || text) {
     readAndAppend(newNote, "./db/db.json");
